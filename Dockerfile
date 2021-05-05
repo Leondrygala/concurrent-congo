@@ -2,6 +2,6 @@ FROM openjdk:16
 
 WORKDIR /work
 
-COPY /src/ /usr/local/bin
+COPY bazel-bin bazel-bin
 
-ENTRYPOINT ["/bin/bash"]
+#ENTRYPOINT ["/usr/local/bin/ProjectRunner"]
