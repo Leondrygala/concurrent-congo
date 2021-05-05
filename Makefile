@@ -10,19 +10,7 @@ CI_COMMIT			?= $(shell git rev-parse --short HEAD)
 ENV_FILE			:= ".env"
 
 .PHONY: build
-build: build-java build-docker
-
-.PHONY: build-docker
-build-docker: build-java
-	docker build \
-		--tag $(RELEASE_PATH):$(shell cat VERSION)-$(CI_COMMIT) \
-		--tag $(RELEASE_PATH):$(shell cat VERSION) \
-		--tag $(RELEASE_PATH):$(BUILD_TAG) \
-		.
-
-.PHONY: bazel-build-java
-bazel-build-java:
-	bazel build //:ProjectRunner
+build: build-java
 
 .PHONY: build-java
 build-java:
@@ -67,31 +55,3 @@ gradle:
 		-v "$(PWD)":/home/gradle/project \
 		-w /home/gradle/project \
 		gradle:jdk16 ./gradlew $(ARGS)
-
-.PHONY: release
-release:
-	docker push $(RELEASE_PATH):$(shell cat VERSION)-$(CI_COMMIT)
-	docker push $(RELEASE_PATH):$(shell cat VERSION)
-	docker push $(RELEASE_PATH):$(BUILD_TAG)
-
-
-.PHONY: graph
-graph: bazel-build-java
-	bazel query  --notool_deps --noimplicit_deps "deps(//:ProjectRunner)" --output graph
-
-#.PHONY: test
-#test: build 
-	#test/test-main.sh
-#
-#.PHONY: debug
-#debug: build
-	#docker run -it --rm \
-		#--entrypoint bash \
-		#-e IMAGE_TAG="6.6.6" \
-		#--env-file $(ENV_FILE) \
-		#$(RELEASE_PATH):$(BUILD_TAG)
-
-#.PHONY: clean
-#clean:
-	#-docker images | grep "$(RELEASE_PATH)" | tr -s ' ' \
-		#| cut -d ' ' -f 2 | xargs -I {} docker rmi $(RELEASE_PATH):{}
